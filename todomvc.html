@@ -37,13 +37,13 @@
                 </span>
                 <ul class="filters">
                     <li @click="allTodo">
-                        <a href="#/all" class="selected">All</a>
+                        <a href="#/all" :class="{selected:1 === selectedIndex}">All</a>
                     </li>
                     <li @click="activeTodo">
-                        <a href="#/active" class="">Active</a>
+                        <a href="#/active" :class="{selected:2 === selectedIndex}">Active</a>
                     </li>
                     <li @click="completedTodo">
-                        <a href="#/completed" class="">Completed</a>
+                        <a href="#/completed" :class="{selected:3 === selectedIndex}">Completed</a>
                     </li>
                 </ul>
                 <button class="clear-completed" @click="cleartodos" v-show="times < todoLists.length">
@@ -70,7 +70,7 @@
             dataLeftNum: 0,
             whichShow: true,
             defaultShow: true,
-            
+            selectedIndex:1
         },
         methods: {
             addTodo(e) {
@@ -107,15 +107,17 @@
             allTodo() {
                 this.defaultShow = true
                 this.whichShow = true
+                this.selectedIndex = 1
             },
             activeTodo() {
                 this.defaultShow = false
                 this.whichShow = false
-                console.log(this.defaultShow,this.whichShow)
+                this.selectedIndex = 2
             },
             completedTodo() {
                 this.defaultShow = false
                 this.whichShow = true
+                this.selecedtIndex = 3
             },
             test(item) {
                 console.log(item.isChecked)
