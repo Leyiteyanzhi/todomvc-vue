@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>todos</title>
+    <link rel="stylesheet" type="text/css" href="css/base.css">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <script src="./src/vue.js"></script>
+</head>
+
+<body>
+    <section class="todoapp">
+        <div>
+            <header class="header">
+                <h1>todos</h1>
+                <input class="new-todo" placeholder="请输入内容" @keyup.enter="addTodo($event.target)" ref="currentInput" />
+            </header>
+            <section class="main">
+                <input class="toggle-all" type="checkbox" @click="selectAllTodos" />
+                <ul class="todo-list">
+                    <li :class="{completed:item.isChecked,editing:item.isEditing}" v-for="(item,index) in todoLists" @mouseover="item.isActive = true"
+                        @mouseleave="item.isActive = false" @dblclick="toEdit(item)" v-show="defaultShow || (whichShow?item.isChecked:!item.isChecked)">
+                        <div class="view" v-show="!item.isEditing">
+                            <input class="toggle" type="checkbox" v-model="item.isChecked" />
+                            <label @click="test(item)">{{item.value}}</label>
+                            <button class="destroy" @click="deleteTodo(index)"></button>
+                        </div>
+                        <input class="edit" v-model="item.value" v-show="item.isEditing" @blur="unEdit(item)" v-todo-focus="item.value" />
+                    </li>
+                </ul>
+            </section>
+            <footer class="footer">
+                <span class="todo-count">
+                    <strong>{{times}}</strong>
+                    <span>条未选中</span>
+                </span>
+                <ul class="filters">
+                    <li @click="allTodo">
+                        <a href="#/all" class="selected">All</a>
+                    </li>
+                    <li @click="activeTodo">
+                        <a href="#/active" class="">Active</a>
+                    </li>
+                    <li @click="completedTodo">
+                        <a href="#/completed" class="">Completed</a>
+                    </li>
+                </ul>
+                <button class="clear-completed" @click="cleartodos" v-show="times < todoLists.length">
+                    Clear completed
+                </button>
+            </footer>
+        </div>
+    </section>
+</body>
+<script>
+    /*
+                                                		1. 增删改查数据，要使用localStorage做数据持久化
+                                                		2. 根据hash不同，过滤渲染的数据
+                                                			a. 全部任务
+                                                			b. 完成的任务
+                                                			c. 未完成的任务
+                                                		3. 自己设计数据结构
+                                                			
+                                                	*/
+    new Vue({
+        el: '.todoapp',
+        data: {
+            todoLists: [],
+            dataLeftNum: 0,
+            whichShow: true,
+            defaultShow: true,
+            
+        },
+        methods: {
+            addTodo(e) {
+                let val = e.value;
+                if (val === '') {
+                    return
+                }
+                this.todoLists = this.todoLists.concat({
+                    value: val,
+                    isEditing: false,
+                    isActive: false,
+                    isChecked: false
+                })
+                this.$refs.currentInput.value = '';
+                window.localStorage.setItem("content", JSON.stringify(this.todoLists))
+            },
+            deleteTodo(index) { //删除单条todo
+                this.todoLists.splice(index, 1);
+                window.localStorage.setItem("content", JSON.stringify(this.todoLists))
+            },
+            toEdit(obj) {
+                obj.isEditing = true
+            },
+            unEdit(obj) {
+                obj.isEditing = false
+            },
+            selectAllTodos() {
+                this.todoLists.map(todo => todo.isChecked = todo.isChecked ? false : true)
+            },
+            cleartodos() {
+                this.todoLists = this.todoLists.filter(todo => todo.isChecked === false)
+                window.localStorage.setItem("content", JSON.stringify(this.todoLists))
+            },
+            allTodo() {
+                this.defaultShow = true
+                this.whichShow = true
+            },
+            activeTodo() {
+                this.defaultShow = false
+                this.whichShow = false
+                console.log(this.defaultShow,this.whichShow)
+            },
+            completedTodo() {
+                this.defaultShow = false
+                this.whichShow = true
+            },
+            test(item) {
+                console.log(item.isChecked)
+            }
+        },
+        computed: {
+            times() {
+                let todoArr = this.todoLists
+                let times = 0
+                for (let i = 0; i < todoArr.length; i++) {
+                    if (todoArr[i].isChecked === false) {
+                        times++
+                    }
+                }
+                return times
+            }
+        },
+        directives: {
+            "todo-focus": function (el, binding) {
+                if (binding.value) {
+                    el.focus()
+                }
+            }
+        }
+    })
+</script>
+
+</html>
